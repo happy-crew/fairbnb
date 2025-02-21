@@ -1,49 +1,41 @@
 name: Run Postman Update
 
 on:
-  pull_request:
-    paths:
-      - "backend/**"
-    branches:
-      - main
   push:
-    paths:
-      - "backend/**"
     branches:
       - main
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
 
 jobs:
-  pytest:
-    name: Run Tests
+  build-and-test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
-    strategy:
-      matrix:
-        python-version: [3.12]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - name: Build Docker image
+        run: |
+          export DJANGO_SETTINGS_MODULE="src.db.settings"
+          export DJANGO_SECRET_KEY="${{ secrets.DJANGO_SECRET_KEY }}"
+          docker build -t my-backend-image:latest ./backend
+
+      - name: Start container
+        run: |
+          docker run -d -p 8000:8000 --name my-backend-container my-backend-image:latest
+          sleep 5  # Wait for the container to start
+
+      - name: Fetch OpenAPI JSON
+        run: |
+          curl -s http://localhost:8000/openapi.json -o openapi.json
+          cat openapi.json  # Optional: Show the fetched OpenAPI spec for debugging
+
+      - name: Push OpenAPI to Postman
+        uses: jumaevkova04/openapi2postman@main
         with:
-          python-version: ${{ matrix.python-version }}
+          api-key: ${{ secrets.POSTMAN_API_KEY }}
+          workspace-id: ${{ secrets.POSTMAN_WORKSPACE_ID }}
+          collection-id: ${{ secrets.POSTMAN_COLLECTION_ID }}
+          file: ./openapi.json
 
-      - name: Install and configure Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: false
-          virtualenvs-in-project: false
-          installer-parallel: true
-
-      - name: Install Application
-        run: poetry install
-
-      - name: Run Tests
-        run: pytest -vv
+      - name: Cleanup
+        run: docker stop my-backend-container && docker rm my-backend-container
