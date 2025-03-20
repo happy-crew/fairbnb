@@ -45,9 +45,10 @@ jobs:
       - name: Install Application
         run: poetry install
 
-      - name: Set up Django environment
+      - name: Set up environment
         run: |
-          export DJANGO_SETTINGS_MODULE=src.db.settings
+          echo "DJANGO_SETTINGS_MODULE=src.db.settings" >> $GITHUB_ENV
+          echo "USE_TEST_DB=true" >> $GITHUB_ENV
 
       - name: Run Tests
         run: pytest -vv

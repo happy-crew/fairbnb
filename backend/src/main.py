@@ -4,7 +4,6 @@ import sys
 from contextlib import asynccontextmanager
 
 import django
-from asgiref.sync import sync_to_async
 from django.core.wsgi import get_wsgi_application
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.wsgi import WSGIMiddleware
@@ -18,7 +17,6 @@ from src.db.properties.models import Property  # noqa: E402
 from src.db.settings import DEBUG  # noqa: E402
 from src.db.users.models import User  # noqa: E402
 from src.schemas import PropertyCreate, PropertyRead, UserCreate, UserRead  # noqa: E402
-from src.seed import seed_database  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -37,10 +35,6 @@ logger.addHandler(stream_handler)
 async def lifespan(app: FastAPI):  # noqa: ARG001
     logger.info("startup: triggered")
 
-    # Seed database if in DEBUG mode
-    if DEBUG:
-        await sync_to_async(seed_database)()
-        logger.info("Database seeded")
     yield
     logger.info("shutdown: triggered")
 

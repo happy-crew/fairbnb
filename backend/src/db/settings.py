@@ -11,15 +11,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import os
-from importlib.util import find_spec
 from pathlib import Path
-
-from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-print("Loading settings...")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -29,8 +24,19 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-# If pytest is imported, set DEBUG to True, else set it to False
-DEBUG = bool(find_spec("pytest"))
+
+"""
+Note on using environment variables and running tests with pytest:
+- settings.py for Django loads before conftest.py for pytest, so use .env or launch.json files to set environment variables that are needed to set up the Django app for tests (e.g., to connect to test DB).
+
+- Use the terminal or VSCode debugger to run tests with pytest; the VSCode test runner creates its own environment and ignores environment variables. This causes the Django app to point to the container DB instead of the test DB."
+"""
+
+# Set USE_TEST_DB to True if the USE_TEST_DB environment variable is set to "True", else set it to False
+USE_TEST_DB = os.getenv("USE_TEST_DB", "false").lower() == "true"
+
+# Set DEBUG to True if the DEBUG environment variable is set to "True", else set it to False
+DEBUG = os.getenv("DEBUG", "false").lower == "true"
 
 ALLOWED_HOSTS = []
 
@@ -83,10 +89,11 @@ WSGI_APPLICATION = "fairbnb.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 # Load environment variables from .env file
-load_dotenv()
+# load_dotenv()
 
-# If DEBUG is True, use an in-memory SQLite database, else use a PostgreSQL database
-if DEBUG:
+# If USE_TEST_DB is True, use an in-memory SQLite database for pytest, else use a PostgreSQL database
+if USE_TEST_DB:
+    print("Using in-memory SQLite database for tests")
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -94,6 +101,7 @@ if DEBUG:
         }
     }
 else:
+    print("Using PostgreSQL database")
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
