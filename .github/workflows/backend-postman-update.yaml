@@ -1,0 +1,41 @@
+name: Run Postman Update
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          export DJANGO_SETTINGS_MODULE="src.db.settings"
+          export DJANGO_SECRET_KEY="${{ secrets.DJANGO_SECRET_KEY }}"
+          docker build -t my-backend-image:latest ./backend
+
+      - name: Start container
+        run: |
+          docker run -d -p 8000:8000 --name my-backend-container my-backend-image:latest
+          sleep 5  # Wait for the container to start
+
+      - name: Fetch OpenAPI JSON
+        run: |
+          curl -s http://localhost:8000/openapi.json -o openapi.json
+          cat openapi.json  # Optional: Show the fetched OpenAPI spec for debugging
+
+      - name: Push OpenAPI to Postman
+        uses: jumaevkova04/openapi2postman@main
+        with:
+          api-key: ${{ secrets.POSTMAN_API_KEY }}
+          workspace-id: ${{ secrets.POSTMAN_WORKSPACE_ID }}
+          collection-id: ${{ secrets.POSTMAN_COLLECTION_ID }}
+          file: ./openapi.json
+
+      - name: Cleanup
+        run: docker stop my-backend-container && docker rm my-backend-container
