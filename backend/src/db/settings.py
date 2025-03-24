@@ -88,8 +88,6 @@ WSGI_APPLICATION = "fairbnb.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# Load environment variables from .env file
-# load_dotenv()
 
 # If USE_TEST_DB is True, use an in-memory SQLite database for pytest, else use a PostgreSQL database
 if USE_TEST_DB:
