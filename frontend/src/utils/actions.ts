@@ -17,18 +17,3 @@ export const createProfileAction = async (
     return { message: "there was an error" };
   }
 };
-
-export const fetchProperties = async ({
-  search = "",
-  category,
-}: {
-  search?: string;
-  category?: string;
-}) => {
-  const data = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/properties`, {
-    cache: "no-store",
-  });
-  const properties = await data.json();
-
-  return properties;
-};

@@ -11,3 +11,10 @@ export type PropertyCardProps = {
   location: string;
   price: number;
 };
+
+export type ProfileData = {
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+};

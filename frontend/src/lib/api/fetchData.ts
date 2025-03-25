@@ -1,7 +1,7 @@
 "use server";
 
 export const fetchPropertiesListings = async () => {
-  const data = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/listings`, {
+  const data = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/properties`, {
     cache: "no-store",
   });
   const posts = await data.json();
