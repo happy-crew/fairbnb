@@ -22,7 +22,14 @@ jobs:
       - name: Start container
         run: |
           docker run -d -p 8000:8000 --name my-backend-container my-backend-image:latest
-          sleep 5  # Wait for the container to start
+          # Wait for the container to be ready
+          for i in {1..10}; do
+            if curl -s http://localhost:8000/openapi.json -o /dev/null; then
+              break
+            fi
+            echo "Waiting for the backend to be ready..."
+            sleep 5
+          done
 
       - name: Fetch OpenAPI JSON
         run: |

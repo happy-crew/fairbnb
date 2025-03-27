@@ -57,6 +57,5 @@ class UserCreate(UserBase):
 class UserRead(UserBase):
     id: int | None = Field(..., description="The ID of the user")
     is_active: bool = Field(..., description="The active status of the user")
-    properties: list[PropertyRead] = []
 
     model_config = ConfigDict(from_attributes=True)
