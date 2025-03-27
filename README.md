@@ -4,7 +4,7 @@ Welcome to Fairbnb, a clone of Airbnb. This doc aims to quickly onboard devs to 
 ## Set up local back-end dev environment
 To load virtual environment in your shell, go to the `backend` folder and run `poetry shell`. Dependencies for the app are included in the `poetry.lock` and `pyproject.toml` files. To update and install dependencies, use `poetry add` followed by `poetry install`; avoid editing `pyproject.toml` directly (but run `poetry update` if you do). You can also load the virtual environment separately for each command by running `poetry run {your command}`.
 
-Create a file `backend/.env.docker` with the environment variables below for the BE container. You can also run `source .env.docker` to add the environment variables to your local machine for development before building the BE container.
+To set up the Django app and database connection, create a file `backend/.env.docker` with the environment variables below for the BE container. You can also run `source .env.docker` to add the environment variables to your local machine for development before building the BE container.
 ```
 # Dev database credentials
 export POSTGRES_USER="{username}"
@@ -17,6 +17,13 @@ export POSTGRES_DB="{db-name}"
 export DJANGO_SETTINGS_MODULE="src.db.settings"
 export DJANGO_SECRET_KEY="{django-secret-key}"
 ```
+
+To run tests using pytest and an in-memory test DB, create a copy of `.env.docker` for local development, rename it to `.env`. Add the line below to export the variable USE_TEST_DB=true.
+```
+export USE_TEST_DB=true
+```
+To develop or debug the backend while connected to the local container running the application DB, export USE_TEST_DB=false.
+
 
 ## Set up local front-end dev environment
 Create a file `frontend/.env` with the environment variables below for the FE container.
